@@ -15,12 +15,6 @@ struct Input {
     std::vector<float> values;
 };
 
-struct FaceObject{
-    cv::Rect_<float> rect;
-    cv::Point2f landmark[5];
-    float prob;
-};
-
 namespace detectorConfig{
     const std::map<std::string,int> retina = {
             {"width",640}, {"height",640}, {"channels",3},

@@ -112,29 +112,3 @@ std::string utils::base64Decode(const char *Data, int DataByte) {
     }
     return strDecode;
 }
-
-
-std::string utils::arrayToString(float* array,int length,std::string seq){
-    std::vector<float> vecs(array, array + length);
-    std::stringstream ss;
-    ss << std::setprecision(16);
-    std::copy(vecs.begin(), vecs.end(), std::ostream_iterator<double>(ss, seq.c_str()));
-    std::string values = ss.str();
-    values.pop_back();
-    return values;
-}
-
-float* utils::stringToArray(std::string str) {
-    std::vector<float> vector;
-    std::stringstream ss(str);
-    ss << std::setprecision(8);
-    std::string token;
-    while (std::getline(ss, token, ',')) {
-        vector.push_back(std::stod(token));
-    }
-    float* array = new float[vector.size()];
-    for (int i = 0; i < vector.size(); i++) {
-        array[i] = vector[i];
-    }
-    return array;
-}
