@@ -4,6 +4,7 @@
 
 #include "utils.h"
 #include <iterator>
+
  void utils::createInputImage(std::vector<float> &input,cv::Mat image,const int width,int height, int channels,bool normalization){
      cv::Mat dst(width, height, CV_8UC3);
      cv::resize(image, dst, cv::Size(width, height));
@@ -35,33 +36,51 @@
 
      input = input_image;
 }
-void utils::nms(const std::vector<cv::Rect> &srcRects, std::vector<cv::Rect> &resRects, std::vector<int> &resIndexs,float thresh) {
-    resRects.clear();
-    const size_t size = srcRects.size();
-    if (!size) return;
-    // Sort the bounding boxes by the bottom - right y - coordinate of the bounding box
-    std::multimap<int, size_t> idxs;
-    for (size_t i = 0; i < size; ++i){
-        idxs.insert(std::pair<int, size_t>(srcRects[i].br().y, i));
-    }
-    // keep looping while some indexes still remain in the indexes list
-    while (idxs.size() > 0){
-        // grab the last rectangle
-        auto lastElem = --std::end(idxs);
-        const cv::Rect& last = srcRects[lastElem->second];
-        resIndexs.push_back(lastElem->second);
-        resRects.push_back(last);
-        idxs.erase(lastElem);
-        for (auto pos = std::begin(idxs); pos != std::end(idxs); ){
-            // grab the current rectangle
-            const cv::Rect& current = srcRects[pos->second];
-            float intArea = (last & current).area();
-            float unionArea = last.area() + current.area() - intArea;
-            float overlap = intArea / unionArea;
-            // if there is sufficient overlap, suppress the current bounding box
-            if (overlap > thresh) pos = idxs.erase(pos);
-            else ++pos;
+void utils::nms(std::vector<FaceInfo> &input, std::vector<FaceInfo> &output,float iou_threshold) {
+    std::sort(input.begin(), input.end(), [](const FaceInfo &base, const FaceInfo &target) { return base.score > target.score; });
+    int box_num = input.size();
+    std::vector<int> merged(box_num, 0);
+    for (int i = 0; i < box_num; i++) {
+        if (merged[i]) continue;
+        std::vector<FaceInfo> buf;
+        buf.push_back(input[i]);
+        merged[i] = 1;
+        float h0 = input[i].y2 - input[i].y1 + 1;
+        float w0 = input[i].x2 - input[i].x1 + 1;
+        float area0 = h0 * w0;
+        for (int j = i + 1; j < box_num; j++) {
+            if (merged[j])
+                continue;
+
+            float inner_x0 = input[i].x1 > input[j].x1 ? input[i].x1 : input[j].x1;
+            float inner_y0 = input[i].y1 > input[j].y1 ? input[i].y1 : input[j].y1;
+
+            float inner_x1 = input[i].x2 < input[j].x2 ? input[i].x2 : input[j].x2;
+            float inner_y1 = input[i].y2 < input[j].y2 ? input[i].y2 : input[j].y2;
+
+            float inner_h = inner_y1 - inner_y0 + 1;
+            float inner_w = inner_x1 - inner_x0 + 1;
+
+            if (inner_h <= 0 || inner_w <= 0)
+                continue;
+
+            float inner_area = inner_h * inner_w;
+
+            float h1 = input[j].y2 - input[j].y1 + 1;
+            float w1 = input[j].x2 - input[j].x1 + 1;
+
+            float area1 = h1 * w1;
+
+            float score;
+
+            score = inner_area / (area0 + area1 - inner_area);
+
+            if (score > iou_threshold) {
+                merged[j] = 1;
+                buf.push_back(input[j]);
+            }
         }
+        output.push_back(buf[0]);
     }
 }
 
@@ -111,4 +130,37 @@ std::string utils::base64Decode(const char *Data, int DataByte) {
         }
     }
     return strDecode;
+}
+
+void utils::generateAnchors(std::vector<std::vector<float>> &anchors, int width, int height) {
+    const std::vector<float> strides = { 8.0, 16.0, 32.0, 64.0 };
+    const std::vector<std::vector<float>> min_boxes = {{10.0f,  16.0f,  24.0f},{32.0f,  48.0f},{64.0f,  96.0f},{128.0f, 192.0f, 256.0f} };
+    std::vector<std::vector<float>> feature_map_size;
+    std::vector<std::vector<float>> shrinkage_size;
+    std::vector<int> width_height = {width,height};
+    for (auto size : width_height) {
+        std::vector<float> fm_item;
+        for (float stride : strides) {
+            fm_item.push_back(ceil(size / stride));
+        }
+        feature_map_size.push_back(fm_item);
+        shrinkage_size.push_back(strides);
+    }
+
+    for (int index = 0; index < num_feature_map; index++) {
+        float scale_w = width / shrinkage_size[0][index];
+        float scale_h = height / shrinkage_size[1][index];
+        for (int j = 0; j < feature_map_size[1][index]; j++) {
+            for (int i = 0; i < feature_map_size[0][index]; i++) {
+                float x_center = (i + 0.5) / scale_w;
+                float y_center = (j + 0.5) / scale_h;
+
+                for (float k : min_boxes[index]) {
+                    float w = k / width;
+                    float h = k / height;
+                    anchors.push_back({ clip(x_center, 1), clip(y_center, 1), clip(w, 1), clip(h, 1) });
+                }
+            }
+        }
+    }
 }

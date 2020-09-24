@@ -4,7 +4,7 @@
 
 #include "api.h"
 static Detector detector;
-
+#include <chrono>
 /**
  * init
  * @param model_path
@@ -81,23 +81,20 @@ void getUsages(){
 int main(){
 
     //test detectByFile()
-    const char* model_path = "/home/jiaopan/projects/c++/retinaface-onnx-linux/model/retinaface.onnx";
+    const char* model_path = "/home/jiaopan/projects/c++/ultraface-onnx-linux/model/version-RFB-320_without_postprocessing.onnx";
     int status = init(model_path,1);
-    std::cout << "status" << status << std::endl;
-    char* result = detectByFile("/home/jiaopan/Downloads/zidane.jpg",0.5);
-    std::cout << "result:" << result << std::endl;
+    std::cout << "status:" << status << std::endl;
+
+    auto start = std::chrono::steady_clock::now();
+    char* result = detectByFile("/home/jiaopan/Downloads/test1.jpeg",0.9);
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double> elapsed = end - start;
+
+    std::cout << "elapsed:" << elapsed.count() <<"\nresult:" << result << std::endl;
     //std::cout << "unload:" << unload("detector") << std::endl;
 
-    /*
-    cv::Mat image = cv::imread("/home/jiaopan/Downloads/bus.jpg");
-    cv::Scalar colors[20] = { cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0),cv::Scalar(0,0,255),
-                              cv::Scalar(255,255,0),cv::Scalar(255,0,255), cv::Scalar(0,255,255),
-                              cv::Scalar(255,255,255), cv::Scalar(127,0,0),cv::Scalar(0,127,0),
-                              cv::Scalar(0,0,127),cv::Scalar(127,127,0), cv::Scalar(127,0,127),
-                              cv::Scalar(0,127,127), cv::Scalar(127,127,127),cv::Scalar(127,255,0),
-                              cv::Scalar(127,0,255),cv::Scalar(127,255,255), cv::Scalar(0,127,255),
-                              cv::Scalar(255,127,0), cv::Scalar(0,255,127) };  //ÑÕÉ«
-
+    /**/
+    cv::Mat image = cv::imread("/home/jiaopan/Downloads/test1.jpeg");
     cJSON *root;
     root = cJSON_Parse(result);
     cJSON *code = cJSON_GetObjectItem(root, "code");
@@ -108,19 +105,16 @@ int main(){
         cv::Rect rect;
         for (int i = 0; i < size; ++i) {
             cJSON *item = cJSON_GetArrayItem(data, i);
-            cJSON *label = cJSON_GetObjectItem(item, "label");
-            std::cout << label->valuestring << std::endl;
             cJSON *location = cJSON_GetObjectItem(item, "location");
             rect = cv::Rect(cJSON_GetObjectItem(location, "x")->valuedouble, cJSON_GetObjectItem(location, "y")->valuedouble,
                             cJSON_GetObjectItem(location, "width")->valuedouble, cJSON_GetObjectItem(location, "height")->valuedouble);
-            rectangle(image, rect, cv::Scalar(colors[i % 4]), 3, 1, 0);
-            putText(image, label->valuestring, cv::Point(rect.x + 5, rect.y + 13), cv::FONT_HERSHEY_COMPLEX, 0.5, cv::Scalar(colors[i % 4]), 1, 8);
+            rectangle(image, rect, cv::Scalar(255,127,0), 2, 1, 0);
 
         }
     }
     imwrite("output.jpg", image);
-*/
+
     // unload("detector");//unload loaded model
-    std::cin.get();
+    //std::cin.get();
     return 0;
 }

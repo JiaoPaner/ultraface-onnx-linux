@@ -14,15 +14,21 @@ struct Input {
     std::vector<int64_t> dims;
     std::vector<float> values;
 };
-
+typedef struct FaceInfo {
+    float x1;
+    float y1;
+    float x2;
+    float y2;
+    float score;
+} FaceInfo;
 namespace detectorConfig{
-    const std::map<std::string,int> retina = {
-            {"width",640}, {"height",640}, {"channels",3},
-            {"bboxs",1},{"landmark",2},{"scores",0},
-            {"min_score",.3f}
+    const std::map<std::string,int> ultraface = {
+            {"width",320}, {"height",240}, {"channels",3},
+            {"bboxs",1},{"scores",0},
+            {"min_score",.9f}
     };
     const std::map<std::string,std::map<std::string,int>> map = {
-            {"retina",retina}
+            {"ultraface",ultraface}
     };
 }
 
