@@ -15,7 +15,7 @@ link_directories(lib)
 file(GLOB src src/*.cpp include/*.h src/*.c)
 set(SRC ${src})
 
-add_executable(ultraface ${SRC})
-#add_library(ultraface SHARED ${SRC})
+#add_executable(ultraface ${SRC})
+add_library(ultraface SHARED ${SRC})
 
 target_link_libraries(ultraface ${OpenCV_LIBS} onnxruntime)

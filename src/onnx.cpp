@@ -3,7 +3,8 @@
 //
 
 #include "onnx.h"
-Ort::Env env{ ORT_LOGGING_LEVEL_WARNING, "inference" };
+Ort::Env env{ ORT_LOGGING_LEVEL_WARNING, "faceDetector" };
+
 /**
  * init session,load model
  * @param model_path

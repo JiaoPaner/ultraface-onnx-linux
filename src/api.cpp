@@ -14,7 +14,7 @@ static Detector detector;
 int init(const char* model_path,int num_threads) {
     return detector.init(model_path, num_threads);
 }
-int unload(const char* type) {
+int unload() {
     return detector.unload();
 }
 
@@ -61,21 +61,6 @@ void getUsages(){
     std::cout << "use api." << std::endl;
     std::cout << "result.code = 0 ---> success" << std::endl;
     std::cout << "result.code = 1 ---> error" << std::endl;
-    std::cout << "=====================python=====================" << std::endl;
-    std::cout
-    <<"import ctypes\n"
-    <<"so = ctypes.cdll.LoadLibrary(\"/home/jiaopan/projects/c++/cv_algorithm/cmake-build-debug/libcv_algorithm.so\");\n"
-    <<"so.testApi();\n"
-    <<"model_path = bytes(\"/home/jiaopan/projects/c++/onnx_test/squeezenet1.0-8.onnx\",\"utf-8\")\n"
-    <<"code = so.init(model_path,bytes(\"squeezenet\",\"utf-8\"));\n"
-    <<"print(code)\n"
-    <<"file = bytes(\"/home/jiaopan/Downloads/OIP.PsqDpksIRqsptoeBxA4ZSgHaFj.jpeg\",\"utf-8\")\n"
-    <<"result = so.classifyByFile(file)\n"
-    <<"result = ctypes.string_at(result, -1).decode(\"utf-8\")\n"
-    <<"print(result)\n"
-    <<R"({"code":0,"msg":"success","data":[{"label":"Labrador retriever","score":0.638810}]})"
-    << std::endl;
-    std::cout << "================================================" << std::endl;
 }
 
 int main(){
@@ -109,7 +94,6 @@ int main(){
             rect = cv::Rect(cJSON_GetObjectItem(location, "x")->valuedouble, cJSON_GetObjectItem(location, "y")->valuedouble,
                             cJSON_GetObjectItem(location, "width")->valuedouble, cJSON_GetObjectItem(location, "height")->valuedouble);
             rectangle(image, rect, cv::Scalar(255,127,0), 2, 1, 0);
-
         }
     }
     imwrite("output.jpg", image);

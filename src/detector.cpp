@@ -13,6 +13,7 @@ int Detector::init(const char* model_path,int num_threads){
     try {
         this->unload();
         this->session = this->onnx.init(model_path, num_threads);
+        std::cout << "this is a face detector lib by jiaopaner@qq.com" << std::endl;
         return 0;
     }
     catch (const std::exception &e) {

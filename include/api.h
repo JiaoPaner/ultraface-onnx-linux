@@ -14,14 +14,14 @@ extern "C" {
     /**
      * common api
      */
-    int init(const char* model_path,int num_threads=1);
-    int unload(const char* type);
+    int init(const char* model_path,int num_threads = 1);
+    int unload();
 
     /**
      * detection api
      */
-    char* detectByBase64(const char* base64_data, float min_score = 0.5f);
-    char* detectByFile(const char* file, float min_score = 0.5f);
+    char* detectByBase64(const char* base64_data, float min_score = 0.9);
+    char* detectByFile(const char* file, float min_score = 0.9);
 
 
     /**

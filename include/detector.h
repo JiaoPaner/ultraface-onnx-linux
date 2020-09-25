@@ -10,8 +10,8 @@
 class Detector {
     public:
         int init(const char* model_path,int num_threads);
-        char* detect(cv::Mat image, float min_score);
-        char* analysis(std::vector<Ort::Value> &output_tensor,int width, int height, const std::map<std::string,int> &params,float min_score=0.7f);
+        char* detect(cv::Mat image, float min_score = 0.9f);
+        char* analysis(std::vector<Ort::Value> &output_tensor,int width, int height, const std::map<std::string,int> &params,float min_score=0.9f);
         int unload();
 
         ~Detector(){};
