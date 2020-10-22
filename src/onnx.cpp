@@ -3,9 +3,6 @@
 //
 
 #include "onnx.h"
-#ifdef GPU
-#include "cuda_provider_factory.h"
-#endif
 Ort::Env env{ ORT_LOGGING_LEVEL_WARNING, "faceDetector" };
 
 /**
@@ -18,10 +15,6 @@ Ort::Session OnnxInstance::init(std::string model_path,int num_threads) {
     auto memory_info = Ort::MemoryInfo::CreateCpu(OrtDeviceAllocator, OrtMemTypeCPU);
     Ort::SessionOptions session_option;
     session_option.SetIntraOpNumThreads(num_threads);
-#ifdef GPU
-    std::cout << "use gpu" << std::endl;
-    auto cuda = OrtSessionOptionsAppendExecutionProvider_CUDA(session_option, 0);
-#endif
     session_option.SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
     Ort::Session session(env, model_path.c_str(), session_option);
     this->createInputsInfo(session);

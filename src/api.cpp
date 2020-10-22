@@ -12,7 +12,9 @@ static Detector detector;
  * @return
  */
 int init(const char* model_path,int num_threads) {
-    return detector.init(model_path, num_threads);
+    int status =detector.init(model_path, num_threads);
+    std::cout << "this is a face detector lib by jiaopaner@qq.com" << std::endl;
+    return status;
 }
 int unload() {
     return detector.unload();
@@ -63,6 +65,9 @@ void getUsages(){
     std::cout << "result.code = 1 ---> error" << std::endl;
 }
 
+#include <chrono>
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
 int main(){
 
     //test detectByFile()
@@ -70,12 +75,12 @@ int main(){
     int status = init(model_path,1);
     std::cout << "status:" << status << std::endl;
 
-    auto start = std::chrono::steady_clock::now();
+    high_resolution_clock::time_point start = high_resolution_clock::now();
     char* result = detectByFile("/home/jiaopan/Downloads/test1.jpeg",0.9);
-    auto end = std::chrono::steady_clock::now();
-    std::chrono::duration<double> elapsed = end - start;
-
-    std::cout << "elapsed:" << elapsed.count() <<"\nresult:" << result << std::endl;
+    high_resolution_clock::time_point end = high_resolution_clock::now();
+    milliseconds cost = std::chrono::duration_cast<milliseconds>(end - start);
+    std::cout << "The elapsed is:" << cost.count() <<"ms"<< std::endl;
+    std::cout << "result:" << result << std::endl;
     //std::cout << "unload:" << unload("detector") << std::endl;
 
     /**/
